@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracfone\Total\Straight Talk  IMEI Scan check</title>
+	 <style>
+        /* CSS for the preloader */
+        #preloader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #preloader img {
+            width: 50px; /* Adjust the size of the preloader spinner */
+            height: 50px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#submitButton").click(function () {
+                var imei = $("#imeiInput").val();
+                
+
+                // Check if IMEI is provided
+                if (!isIMEI(imei)) {
+                    $("#resultText").text("Please enter valid an IMEI number.");
+                    return;
+                }
+				$("#submitButton").prop('disabled', true);
+				$("#preloader").show();
+                $.ajax({
+                    url: "https://webapigateway.tracfone.com/api/pub/resource-mgmt/resource?resourceCategory=HANDSET&sourceSystem=WEB&projection=basic-info&client_id=68283f82-b579-411a-b75f-e99a0abfdb34&language=ENG&resourceIdentifier=" + imei, // Replace with your API endpoint
+                    method: "GET",
+                    data: { },
+                    success: function (data) {
+					if(data.status.code=="0")
+                        $("#resultText").text("Response brand: " + data.resource.resourceSpecification.brand);
+					else 
+					$("#resultText").text("Error: Possible not Tracfone imei");
+				
+                    },
+                    error: function (error) {
+                        $("#resultText").text("Error: " + JSON.stringify(error));
+						
+                    },
+					complete: function () {
+                        // Hide the preloader when the request is complete
+                        $("#preloader").hide();
+						$("#submitButton").prop('disabled', false);
+                    }
+                });
+			
+            });
+			$(".changeImeiLink").click(function (event) {
+                event.preventDefault();
+                var newText = $(this).data("newtext");
+				 $("#imeiInput").val(newText);
+                
+            });
+        });
+		function isIMEI (s) {
+			var etal = /^[0-9]{15}$/;
+			  if (!etal.test(s))
+				return false;
+			  sum = 0; mul = 2; l = 14;
+			  for (i = 0; i < l; i++) {
+				digit = s.substring(l-i-1,l-i);
+				tp = parseInt(digit,10)*mul;
+				if (tp >= 10)
+					 sum += (tp % 10) +1;
+				else
+					 sum += tp;
+				if (mul == 1)
+					 mul++;
+				else
+					 mul--;
+				}
+			  chk = ((10 - (sum % 10)) % 10);
+			  if (chk != parseInt(s.substring(14,15),10))
+				return false;
+			  return true;
+			}
+    </script>
+</head>
+<body>
+    <h1>Tracfone\Total\Straight Talk  IMEI Scan check</h1>
+	<p><b>Check if imei scanned correctly:</br> If status Generic - not scanned</br> If status Tracfone, TOTAL_WIRELESS, etc - all fine</b></p>
+    <p id="infoText">Enter the IMEI and click check:</p>
+    <label for="imeiInput">IMEI:</label>
+    <input type="text" id="imeiInput" name="IMEI">
+
+    <br>
+    <input type="button" id="submitButton" value="Check">
+	    <div id="preloader">
+        <img src="https://loading.io/mod/spinner/spinner/sample.gif" alt="Loading...">
+    </div>
+    <p id="resultText">Result will be displayed here</p>
+	<a href="#" class="changeImeiLink" data-newtext="356356803560446">Tracfone imei 356356803560446</a>
+    <br>
+    <a href="#" class="changeImeiLink" data-newtext="359346671444499">Generic imei 359346671444499</a>
+</body>
+</html>
