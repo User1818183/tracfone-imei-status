@@ -28,7 +28,8 @@
     <script>
         $(document).ready(function () {
             $("#submitButton").click(function () {
-                var imei = $("#imeiInput").val().replace(/\D/g, "");;
+                var imei = $("#imeiInput").val().replace(/\D/g, "");
+		$("#imeiInput").val(imei);
                 
 
                 // Check if IMEI is provided
